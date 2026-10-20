@@ -10,14 +10,14 @@
 <meta property="og:title" content="UK tidal rivers – how far the sea reaches inland">
 <meta property="og:description" content="Eight British rivers from source to sea, coloured by fresh, brackish and salt water, with tributaries and connecting canals. Interactive map with tidal limits and spring tidal ranges.">
 <meta property="og:url" content="https://tijlvandenberg.github.io/uk-tidal-rivers/">
-<meta property="og:image" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview-3.jpg">
-<meta property="og:image:secure_url" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview-3.jpg">
+<meta property="og:image" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview-4.jpg">
+<meta property="og:image:secure_url" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview-4.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Map of Great Britain with eight tidal rivers coloured fresh, brackish and salt">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview-3.jpg">
+<meta name="twitter:image" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview-4.jpg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif}
@@ -48,12 +48,12 @@
   <h1>UK tidal rivers <button class="toggle" id="tg">hide</button></h1>
   <div class="body">
     <div class="lg">
-      <div><i style="height:3px;background:#1D9E75"></i>Fresh, non-tidal</div>
-      <div><i style="height:6px;background:#1D9E75"></i>Fresh, tidal</div>
+      <div><i style="height:3px;background:#1F6FD1"></i>Fresh, non-tidal</div>
+      <div><i style="height:6px;background:#1F6FD1"></i>Fresh, tidal</div>
       <div><i style="height:6px;background:#EF9F27"></i>Brackish</div>
       <div><i style="height:7px;background:#D85A30"></i>Salt</div>
-      <div><i style="height:2px;background:#5DCAA5"></i>Tributary / headwater</div>
-      <div><i style="height:3px;background:#7F77DD"></i>Connecting canal</div>
+      <div><i style="height:2px;background:#7FB2EC"></i>Tributary / headwater</div>
+      <div><i style="height:3px;background:#6E6A64"></i>Connecting canal</div>
       <div><i style="height:10px;width:10px;border-radius:50%;background:#fff;border:2px solid #222"></i>Info point (tap it)</div>
     </div>
     <div class="btns" id="btns"><button data-r="all">All</button></div>
@@ -64,7 +64,7 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-const C={n:['#1D9E75',3],f:['#1D9E75',6],b:['#EF9F27',6],z:['#D85A30',8]};
+const C={n:['#1F6FD1',3],f:['#1F6FD1',6],b:['#EF9F27',6],z:['#D85A30',8]};
 // Reference points: [lon, lat, zone, (optional) note]. The zone applies from this point downstream.
 const R=[
 {t:'Thames',names:['River Thames','Thames'],L:[[
@@ -171,7 +171,7 @@ EXTRA.split('@').forEach(grp=>{const i=grp.indexOf('=');const key=grp.slice(0,i)
   grp.slice(i+1).split('!').forEach(ent=>{const j=ent.indexOf(':');const name=ent.slice(0,j);
     ent.slice(j+1).split(';').forEach(s=>{const v=s.split(',').map(Number);let x=v[0],y=v[1];const pts=[[y/1e3,x/1e3]];
       for(let k=2;k<v.length;k+=2){x+=v[k];y+=v[k+1];pts.push([y/1e3,x/1e3]);}
-      const ln=L.polyline(pts,isCanal?{color:'#7F77DD',weight:2.5,opacity:.9,pane:'extra'}:{color:'#5DCAA5',weight:1.6,opacity:.85,pane:'extra'});
+      const ln=L.polyline(pts,isCanal?{color:'#6E6A64',weight:2.5,opacity:.9,pane:'extra'}:{color:'#7FB2EC',weight:1.6,opacity:.85,pane:'extra'});
       ln.bindTooltip(isCanal?name:name+' ('+key+' system)',{sticky:true});
       ln.addTo(isCanal?canalLayer:tribLayer);
       if(!isCanal&&groups[key])groups[key].addLayer(L.polyline(pts,{opacity:0,weight:0,interactive:false}));
