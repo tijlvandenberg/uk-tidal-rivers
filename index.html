@@ -1,9 +1,23 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Getijdenrivieren UK</title>
+<title>UK tidal rivers</title>
+<meta name="description" content="How far the sea reaches inland: eight British rivers traced from source to sea, coloured by fresh, brackish and salt water, with tidal limits and spring tidal ranges.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="UK tidal rivers">
+<meta property="og:title" content="UK tidal rivers – how far the sea reaches inland">
+<meta property="og:description" content="Eight British rivers traced from source to sea, coloured by fresh, brackish and salt water. Interactive map with tidal limits and spring tidal ranges.">
+<meta property="og:url" content="https://tijlvandenberg.github.io/uk-tidal-rivers/">
+<meta property="og:image" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview.jpg">
+<meta property="og:image:secure_url" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Map of Great Britain with eight tidal rivers coloured fresh, brackish and salt">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://tijlvandenberg.github.io/uk-tidal-rivers/preview.jpg">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif}
@@ -29,60 +43,60 @@
 <body>
 <div id="map"></div>
 <div class="panel" id="panel">
-  <h1>Getijdenrivieren UK <button class="toggle" id="tg">verberg</button></h1>
+  <h1>UK tidal rivers <button class="toggle" id="tg">hide</button></h1>
   <div class="body">
     <div class="lg">
-      <div><i style="height:3px;background:#1D9E75"></i>Zoet, geen getij</div>
-      <div><i style="height:6px;background:#1D9E75"></i>Zoet, met getij</div>
-      <div><i style="height:6px;background:#EF9F27"></i>Brak</div>
-      <div><i style="height:7px;background:#D85A30"></i>Zout</div>
-      <div><i style="height:0;border-top:4px dashed #D85A30"></i>Schematisch estuarium</div>
-      <div><i style="height:10px;width:10px;border-radius:50%;background:#fff;border:2px solid #222"></i>Punt met uitleg (tik erop)</div>
+      <div><i style="height:3px;background:#1D9E75"></i>Fresh, non-tidal</div>
+      <div><i style="height:6px;background:#1D9E75"></i>Fresh, tidal</div>
+      <div><i style="height:6px;background:#EF9F27"></i>Brackish</div>
+      <div><i style="height:7px;background:#D85A30"></i>Salt</div>
+      <div><i style="height:0;border-top:4px dashed #D85A30"></i>Schematic estuary</div>
+      <div><i style="height:10px;width:10px;border-radius:50%;background:#fff;border:2px solid #222"></i>Info point (tap it)</div>
     </div>
-    <div class="btns" id="btns"><button data-r="all">Alle</button></div>
+    <div class="btns" id="btns"><button data-r="all">All</button></div>
     <p id="status"></p>
-    <p style="margin:6px 0 0;color:#666;font-size:11px">Rivierloop: OpenStreetMap. Zoet/brak/zout zijn gemiddelden en schuiven met de rivierafvoer. Getijverschillen bij springtij, afgerond.</p>
+    <p style="margin:6px 0 0;color:#666;font-size:11px">River courses: OpenStreetMap. Fresh/brackish/salt zones are typical averages and shift with river flow. Tidal ranges are rounded spring-tide values.</p>
   </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const C={n:['#1D9E75',3],f:['#1D9E75',6],b:['#EF9F27',6],z:['#D85A30',8]};
-// Ijkpunten: [lon, lat, zone, (optioneel) uitleg]. De zone geldt vanaf dit punt stroomafwaarts.
+// Reference points: [lon, lat, zone, (optional) note]. The zone applies from this point downstream.
 const R=[
 {t:'Thames',names:['River Thames','Thames'],L:[[
- [-0.42,51.42,'n'],[-0.326,51.43,'f','Teddington Lock: getijgrens'],[-0.305,51.46,'f','Richmond: half-tide sluis, springtij ~2 m'],[-0.288,51.484,'f'],[-0.23,51.488,'f'],[-0.215,51.468,'f'],
- [-0.165,51.482,'b','Battersea: zoet gaat over in brak'],[-0.122,51.50,'b'],[-0.087,51.508,'b','London Bridge: springtij ~7 m (grootste van de Thames)'],[-0.04,51.508,'b'],[-0.02,51.50,'b'],[-0.008,51.487,'b'],[0.005,51.505,'b'],
- [0.036,51.497,'b','Thames Barrier (Woolwich): sluit alleen bij stormvloed'],[0.07,51.495,'b'],[0.18,51.485,'z','Erith: globale overgang naar zout'],[0.26,51.465,'z'],[0.37,51.445,'z','Gravesend: zout'],[0.47,51.46,'z'],[0.47,51.50,'z'],[0.60,51.51,'z'],[0.71,51.53,'z','Southend: zout, springtij ~5,8 m'],[0.82,51.52,'z']
+ [-0.42,51.42,'n'],[-0.326,51.43,'f','Teddington Lock: tidal limit'],[-0.305,51.46,'f','Richmond: half-tide lock, spring range ~2 m'],[-0.288,51.484,'f'],[-0.23,51.488,'f'],[-0.215,51.468,'f'],
+ [-0.165,51.482,'b','Battersea: fresh water turns brackish'],[-0.122,51.50,'b'],[-0.087,51.508,'b','London Bridge: spring range ~7 m (largest on the Thames)'],[-0.04,51.508,'b'],[-0.02,51.50,'b'],[-0.008,51.487,'b'],[0.005,51.505,'b'],
+ [0.036,51.497,'b','Thames Barrier (Woolwich): closes only for storm surges'],[0.07,51.495,'b'],[0.18,51.485,'z','Erith: approximate transition to salt water'],[0.26,51.465,'z'],[0.37,51.445,'z','Gravesend: salt water'],[0.47,51.46,'z'],[0.47,51.50,'z'],[0.60,51.51,'z'],[0.71,51.53,'z','Southend: salt water, spring range ~5.8 m'],[0.82,51.52,'z']
 ]]},
 {t:'Severn',names:['River Severn','Afon Hafren / River Severn','Severn'],L:[[
- [-2.16,51.99,'n'],[-2.26,51.88,'f','Gloucester (stuwen Maisemore en Llanthony): getijgrens'],[-2.38,51.85,'f'],[-2.42,51.79,'b','Arlingham: zoet gaat over in brak'],[-2.48,51.72,'b','Sharpness: brak, springtij ~9 m'],[-2.53,51.70,'b'],[-2.57,51.64,'b'],
- [-2.64,51.61,'z','Severn-bruggen: overgang naar zout'],[-2.72,51.51,'z','Avonmouth: zout, springtij 12–14 m (een van de grootste ter wereld)'],[-3.05,51.40,'z']
+ [-2.16,51.99,'n'],[-2.26,51.88,'f','Gloucester (Maisemore and Llanthony weirs): tidal limit'],[-2.38,51.85,'f'],[-2.42,51.79,'b','Arlingham: fresh water turns brackish'],[-2.48,51.72,'b','Sharpness: brackish, spring range ~9 m'],[-2.53,51.70,'b'],[-2.57,51.64,'b'],
+ [-2.64,51.61,'z','Severn bridges: transition to salt water'],[-2.72,51.51,'z','Avonmouth: salt water, spring range 12–14 m (one of the largest in the world)'],[-3.05,51.40,'z']
 ]]},
 {t:'Mersey',names:['River Mersey','Mersey'],L:[[
- [-2.45,53.42,'n'],[-2.58,53.39,'f','Howley Weir, Warrington: getijgrens. Tij boven ~9,45 m in Liverpool loopt over de stuw'],[-2.67,53.37,'f'],[-2.73,53.345,'b','Runcorn Gap: brak, bij hoge afvoer bijna zoet'],[-2.82,53.32,'b'],
- [-2.95,53.315,'z','Eastham: globale overgang naar zout'],[-3.00,53.405,'z','Liverpool: springtij ~10 m, doodtij ~4 m'],[-3.04,53.44,'z'],[-3.12,53.48,'z']
+ [-2.45,53.42,'n'],[-2.58,53.39,'f','Howley Weir, Warrington: tidal limit. Tides above ~9.45 m at Liverpool overtop the weir'],[-2.67,53.37,'f'],[-2.73,53.345,'b','Runcorn Gap: brackish, almost fresh at high river flow'],[-2.82,53.32,'b'],
+ [-2.95,53.315,'z','Eastham: approximate transition to salt water'],[-3.00,53.405,'z','Liverpool: spring range ~10 m, neap ~4 m'],[-3.04,53.44,'z'],[-3.12,53.48,'z']
 ]]},
 {t:'Humber',names:['River Ouse','River Trent','Humber','River Humber','Humber Estuary'],L:[[
- [-1.08,53.96,'n'],[-1.09,53.91,'f','Naburn Lock (York): getijgrens Ouse'],[-1.07,53.78,'f'],[-0.88,53.70,'b','Goole: gemiddelde overgang zoet naar brak; schuift 30–90 km mee met de afvoer'],
- [-0.70,53.70,'b','Trent Falls: Ouse en Trent vormen de Humber'],[-0.57,53.72,'b'],[-0.33,53.74,'b','Hull: brak, springtij ~7 m'],[-0.19,53.63,'z'],[0.11,53.58,'z','Spurn Head: zout, springtij ~6 m']
+ [-1.08,53.96,'n'],[-1.09,53.91,'f','Naburn Lock (York): tidal limit of the Ouse'],[-1.07,53.78,'f'],[-0.88,53.70,'b','Goole: average fresh-to-brackish transition; shifts 30–90 km with river flow'],
+ [-0.70,53.70,'b','Trent Falls: the Ouse and Trent join to form the Humber'],[-0.57,53.72,'b'],[-0.33,53.74,'b','Hull: brackish, spring range ~7 m'],[-0.19,53.63,'z'],[0.11,53.58,'z','Spurn Head: salt water, spring range ~6 m']
 ],[
- [-0.81,53.08,'n'],[-0.80,53.14,'f','Cromwell Lock (Newark): getijgrens Trent'],[-0.77,53.40,'f'],[-0.74,53.60,'f'],[-0.70,53.70,'b']
+ [-0.81,53.08,'n'],[-0.80,53.14,'f','Cromwell Lock (Newark): tidal limit of the Trent'],[-0.77,53.40,'f'],[-0.74,53.60,'f'],[-0.70,53.70,'b']
 ]]},
 {t:'Tyne',names:['River Tyne','Tyne'],L:[[
- [-1.95,54.965,'n'],[-1.82,54.975,'f','Wylam: getijgrens sinds het uitbaggeren in de 19e eeuw'],[-1.74,54.98,'f','Newburn: vroegere getijgrens (Tide Stone, 1783)'],[-1.605,54.968,'b','Newcastle: brak'],[-1.53,54.99,'b'],
- [-1.48,54.985,'z'],[-1.44,55.005,'z','North Shields: zout, springtij ~4–5 m'],[-1.40,55.012,'z']
+ [-1.95,54.965,'n'],[-1.82,54.975,'f','Wylam: tidal limit since 19th-century dredging'],[-1.74,54.98,'f','Newburn: former tidal limit (Tide Stone, 1783)'],[-1.605,54.968,'b','Newcastle: brackish'],[-1.53,54.99,'b'],
+ [-1.48,54.985,'z'],[-1.44,55.005,'z','North Shields: salt water, spring range ~4–5 m'],[-1.40,55.012,'z']
 ]]},
 {t:'Clyde',names:['River Clyde','Clyde'],L:[[
- [-4.17,55.83,'n'],[-4.245,55.852,'b','Tidal weir, Glasgow Green: getijgrens met abrupte overgang zoet naar brak'],[-4.31,55.865,'b'],[-4.39,55.88,'b'],[-4.46,55.915,'b'],
- [-4.57,55.94,'z','Dumbarton: globale overgang naar zout'],[-4.69,55.935,'z'],[-4.76,55.95,'z','Greenock: zout, springtij ~3 m'],[-4.83,55.96,'z']
+ [-4.17,55.83,'n'],[-4.245,55.852,'b','Tidal weir, Glasgow Green: tidal limit, with an abrupt fresh-to-brackish change'],[-4.31,55.865,'b'],[-4.39,55.88,'b'],[-4.46,55.915,'b'],
+ [-4.57,55.94,'z','Dumbarton: approximate transition to salt water'],[-4.69,55.935,'z'],[-4.76,55.95,'z','Greenock: salt water, spring range ~3 m'],[-4.83,55.96,'z']
 ]]},
 {t:'Forth',names:['River Forth','Forth'],L:[[
- [-4.05,56.13,'n'],[-3.94,56.12,'f','Stirling: getijgrens, springtij ~2,4 m'],[-3.83,56.12,'f'],[-3.79,56.11,'b','Alloa: zoet wordt brak, springtij ~6 m'],[-3.72,56.065,'b'],[-3.69,56.03,'b'],[-3.60,56.02,'b'],
- [-3.39,55.99,'z','Queensferry (Forth-bruggen): vrijwel zout'],[-3.17,55.985,'z','Leith (Edinburgh): zout, springtij ~5 m'],[-2.90,56.03,'z']
+ [-4.05,56.13,'n'],[-3.94,56.12,'f','Stirling: tidal limit, spring range ~2.4 m'],[-3.83,56.12,'f'],[-3.79,56.11,'b','Alloa: fresh water turns brackish, spring range ~6 m'],[-3.72,56.065,'b'],[-3.69,56.03,'b'],[-3.60,56.02,'b'],
+ [-3.39,55.99,'z','Queensferry (Forth bridges): nearly full salt water'],[-3.17,55.985,'z','Leith (Edinburgh): salt water, spring range ~5 m'],[-2.90,56.03,'z']
 ]]},
 {t:'Tay',names:['River Tay','Tay'],L:[[
- [-3.47,56.45,'n'],[-3.44,56.425,'f','Getijgrens bij springtij, ~4 km boven Perth'],[-3.425,56.395,'f','Perth: tot de Earn vrijwel zoet'],[-3.30,56.355,'f'],[-3.24,56.355,'b','Newburgh: zoutgrens'],
- [-3.12,56.385,'b','Flisk: grootste getijverschil van de Tay'],[-3.06,56.445,'b'],[-2.99,56.44,'z'],[-2.95,56.46,'z','Dundee: zout, springtij ~5 m'],[-2.87,56.465,'z'],[-2.73,56.46,'z']
+ [-3.47,56.45,'n'],[-3.44,56.425,'f','Spring-tide tidal limit, ~4 km above Perth'],[-3.425,56.395,'f','Perth: almost fresh down to the River Earn'],[-3.30,56.355,'f'],[-3.24,56.355,'b','Newburgh: upstream limit of salt water'],
+ [-3.12,56.385,'b','Flisk: largest tidal range on the Tay'],[-3.06,56.445,'b'],[-2.99,56.44,'z'],[-2.95,56.46,'z','Dundee: salt water, spring range ~5 m'],[-2.87,56.465,'z'],[-2.73,56.46,'z']
 ]]}
 ];
 
@@ -102,7 +116,7 @@ R.forEach(r=>{
 });
 map.fitBounds(all.getBounds(),{padding:[20,20]});
 
-// Zone van een willekeurig punt: projecteer op de dichtstbijzijnde ijklijn-sectie
+// Zone of any point: project onto the nearest reference-line segment
 function zoneOf(r,lon,lat){
   let best=1e9,zone='n';
   r.L.forEach(line=>{
@@ -133,18 +147,23 @@ function drawLine(r,pts){
 }
 
 R.forEach(r=>{
+  // anchor the non-tidal zone: add upstream reference points (river source and halfway down) for each reference line
+  r.L.forEach(line=>{const lim=line[1],mouth=line[line.length-1];let src=null,bd=-1;
+    SRC[r.t].forEach(k=>(LINES[k]||[]).forEach(l=>l.forEach(p=>{const dl=Math.hypot((p[0]-lim[0])*r.k,p[1]-lim[1]),dm=Math.hypot((p[0]-mouth[0])*r.k,p[1]-mouth[1]);if(dm>dl&&dl>bd&&dl<1.6){bd=dl;src=p;}})));
+    if(src&&bd>0.15){const mid=[(src[0]+line[0][0])/2,(src[1]+line[0][1])/2];line.unshift([src[0],src[1],'n'],[mid[0],mid[1],'n']);}
+  });
   const pts=[];SRC[r.t].forEach(k=>(LINES[k]||[]).forEach(l=>{drawLine(r,l);pts.push(...l)}));
   const dist=q=>{let m=1e9;for(const p of pts){const d=Math.hypot((p[0]-q[0])*r.k,p[1]-q[1]);if(d<m)m=d;}return m;};
-  // estuarium voorbij het einde van de rivierlijn: schematisch (gestippeld)
-  r.L.forEach(line=>{let last=-1;line.forEach((q,i)=>{if(dist(q)<0.02)last=i;});
+  // estuary beyond the end of the river line: schematic (dashed)
+  r.L.forEach(line=>{let last=-1;line.forEach((q,i)=>{if(dist(q)<0.05)last=i;});
     for(let i=Math.max(last,0);i<line.length-1;i++){const a=line[i],b=line[i+1],c=C[a[2]];
       L.polyline([[a[1],a[0]],[b[1],b[0]]],{color:c[0],weight:c[1],opacity:.85,dashArray:'6 8',lineCap:'round'}).addTo(r.lines);}
   });
-  // uitlegpunten op de echte rivier leggen (binnen ~3 km)
+  // snap info points onto the real river (within ~3 km)
   r.markers.forEach(m=>{const q=m.q;let best=null,bd=0.035;for(const p of pts){const d=Math.hypot((p[0]-q[0])*r.k,p[1]-q[1]);if(d<bd){bd=d;best=p;}}if(best)m.mk.setLatLng([best[1],best[0]]);});
 });
 map.fitBounds(all.getBounds(),{padding:[20,20]});
-status.textContent='Rivierlopen van bron tot monding (OpenStreetMap, vereenvoudigd tot ~100 m). Gestippeld = schematisch estuarium.';
+status.textContent='Rivers from source to sea (OpenStreetMap, simplified to ~100 m). Dashed = schematic estuary.';
 status.style.color='#3B6D11';
 
 document.getElementById('btns').addEventListener('click',e=>{
@@ -153,7 +172,7 @@ document.getElementById('btns').addEventListener('click',e=>{
 });
 document.getElementById('tg').addEventListener('click',()=>{
   const p=document.getElementById('panel');p.classList.toggle('closed');
-  document.getElementById('tg').textContent=p.classList.contains('closed')?'toon':'verberg';
+  document.getElementById('tg').textContent=p.classList.contains('closed')?'show':'hide';
 });
 </script>
 </body>
