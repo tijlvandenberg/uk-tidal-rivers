@@ -40,10 +40,36 @@
   .leaflet-popup-content b{font-size:14px}
   .layers{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px}
   .layers label{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+  .btns button.on{background:#1F2A30;color:#fff;border-color:#1F2A30}
+  #readbtn{margin-top:8px;width:100%;font:inherit;font-size:13px;font-weight:600;padding:7px;border:0;border-radius:7px;background:#1F6FD1;color:#fff;cursor:pointer}
+  #story{position:absolute;z-index:1001;top:10px;left:10px;bottom:10px;width:400px;background:#fff;border-radius:12px;box-shadow:0 2px 14px rgba(0,0,0,.22);display:flex;flex-direction:column;overflow:hidden}
+  #story.hidden{display:none}
+  #story header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #eee;font-size:13px;color:#5B6670}
+  #story header button{border:0;background:none;font:inherit;font-size:13px;color:#1F6FD1;cursor:pointer;padding:4px}
+  #storybody{overflow-y:auto;padding:4px 22px 28px;font-family:Charter,"Iowan Old Style",Georgia,"Times New Roman",serif;color:#1F2A30;font-size:16px;line-height:1.6}
+  #storybody .kicker{font-family:system-ui,-apple-system,sans-serif;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#1F6FD1;margin:18px 0 4px}
+  #storybody h2{font-size:28px;line-height:1.15;margin:0 0 10px;font-weight:700}
+  #storybody .lead{font-size:18px;line-height:1.5;color:#3a4650;margin:0 0 14px}
+  #storybody h3{font-family:system-ui,-apple-system,sans-serif;font-size:15px;margin:22px 0 4px;color:#1F2A30}
+  #storybody p{margin:0 0 12px}
+  #storybody .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 6px;font-family:system-ui,-apple-system,sans-serif}
+  #storybody .facts div{background:#F3F6F9;border-radius:8px;padding:8px 10px}
+  #storybody .facts b{display:block;font-size:16px;color:#1F2A30}
+  #storybody .facts span{font-size:11.5px;color:#5B6670;line-height:1.3;display:block}
+  #storybody .rivers a{display:block;padding:9px 0;border-top:1px solid #eee;color:#1F2A30;text-decoration:none}
+  #storybody .rivers a b{color:#1F6FD1;font-family:system-ui,-apple-system,sans-serif;font-size:14px}
+  #storybody .src{font-family:system-ui,-apple-system,sans-serif;font-size:12px;color:#5B6670;line-height:1.45;margin-top:22px;border-top:1px solid #eee;padding-top:10px}
+  #storybody .src ol{padding-left:18px;margin:6px 0}
+  #storybody .src a{color:#185FA5;word-break:break-word}
+  #storybody sup a{color:#1F6FD1;text-decoration:none;font-family:system-ui,sans-serif;font-size:11px}
+  @media (max-width:700px){
+    #story{top:0;left:0;right:0;bottom:0;width:auto;border-radius:0}
+  }
 </style>
 </head>
 <body>
 <div id="map"></div>
+<aside id="story" class="hidden" aria-label="Story"><header><span id="storycrumb">The story</span><button id="storyclose">Close ✕</button></header><div id="storybody"></div></aside>
 <div class="panel" id="panel">
   <h1>UK tidal rivers <button class="toggle" id="tg">hide</button></h1>
   <div class="body">
@@ -56,7 +82,8 @@
       <div><i style="height:3px;background:#6E6A64"></i>Connecting canal</div>
       <div><i style="height:10px;width:10px;border-radius:50%;background:#fff;border:2px solid #222"></i>Info point (tap it)</div>
     </div>
-    <div class="btns" id="btns"><button data-r="all">All</button></div>
+    <div class="btns" id="btns"><button data-r="all" class="on">All</button></div>
+    <button id="readbtn">Read the story</button>
     <div class="layers"><label><input type="checkbox" id="lyTrib" checked> Tributaries</label><label><input type="checkbox" id="lyCan" checked> Canals</label><label><input type="checkbox" id="lyBase" checked> Background map</label></div>
     <p id="status"></p>
     <p style="margin:6px 0 0;color:#666;font-size:11px">River courses: OpenStreetMap. Fresh/brackish/salt zones are typical averages and shift with river flow. Tidal ranges are rounded spring-tide values.</p>
@@ -104,7 +131,8 @@ const R=[
 ]]}
 ];
 
-const map=L.map('map').setView([54.3,-2.5],6);
+const map=L.map('map',{zoomControl:false}).setView([54.3,-2.5],6);
+L.control.zoom({position:'bottomright'}).addTo(map);
 map.createPane('extra');map.getPane('extra').style.zIndex=350;
 map.createPane('coast');map.getPane('coast').style.zIndex=250;
 // Simplified coastline (Natural Earth, public domain), shown when the background map is off
@@ -191,10 +219,27 @@ document.getElementById('lyBase').addEventListener('change',e=>{if(e.target.chec
 status.textContent='Main rivers, tributaries and connecting canals from OpenStreetMap. Tap a line for its name.';
 status.style.color='#3B6D11';
 
-document.getElementById('btns').addEventListener('click',e=>{
-  const k=e.target.dataset.r;if(!k)return;
-  map.fitBounds((k==='all'?all:groups[k]).getBounds(),{padding:[30,30]});
-});
+// ---- Story panel ----
+const STORIES=__STORIES__;
+const storyEl=document.getElementById('story'),storyBody=document.getElementById('storybody');
+const wide=()=>window.innerWidth>700;
+let current='all';
+function fit(k){const pad=(wide()&&!storyEl.classList.contains('hidden'))?{paddingTopLeft:[430,30],paddingBottomRight:[270,30]}:{padding:[30,30]};
+  map.fitBounds((k==='all'?all:groups[k]).getBounds(),pad);}
+function renderStory(k){const st=STORIES[k];if(!st)return;
+  document.getElementById('storycrumb').textContent=k==='all'?'UK tidal rivers · overview':'UK tidal rivers · '+k;
+  storyBody.innerHTML=st.html;storyBody.scrollTop=0;
+  storyBody.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',ev=>{ev.preventDefault();select(a.dataset.go,true);}));}
+function select(k,fromStory){current=k;
+  document.querySelectorAll('#btns button').forEach(b=>b.classList.toggle('on',b.dataset.r===k));
+  renderStory(k);
+  if(!wide()&&fromStory)storyEl.classList.add('hidden');
+  fit(k);}
+document.getElementById('btns').addEventListener('click',e=>{const k=e.target.dataset.r;if(!k)return;select(k);});
+document.getElementById('readbtn').addEventListener('click',()=>{renderStory(current);storyEl.classList.remove('hidden');if(wide())fit(current);});
+document.getElementById('storyclose').addEventListener('click',()=>{storyEl.classList.add('hidden');});
+renderStory('all');
+if(wide()){storyEl.classList.remove('hidden');fit('all');}
 document.getElementById('tg').addEventListener('click',()=>{
   const p=document.getElementById('panel');p.classList.toggle('closed');
   document.getElementById('tg').textContent=p.classList.contains('closed')?'show':'hide';
