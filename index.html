@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
   html,body{margin:0;height:100%;font-family:system-ui,-apple-system,sans-serif}
-  #map{position:absolute;inset:0}
+  #map{position:absolute;inset:0;background:#EEF2F4}
   .panel{position:absolute;z-index:1000;top:10px;right:10px;background:#fff;border-radius:10px;padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.2);max-width:240px;font-size:13px}
   .panel h1{font-size:15px;margin:0 0 6px;font-weight:600}
   .lg div{display:flex;align-items:center;gap:8px;margin:3px 0}
@@ -57,7 +57,7 @@
       <div><i style="height:10px;width:10px;border-radius:50%;background:#fff;border:2px solid #222"></i>Info point (tap it)</div>
     </div>
     <div class="btns" id="btns"><button data-r="all">All</button></div>
-    <div class="layers"><label><input type="checkbox" id="lyTrib" checked> Tributaries</label><label><input type="checkbox" id="lyCan" checked> Canals</label></div>
+    <div class="layers"><label><input type="checkbox" id="lyTrib" checked> Tributaries</label><label><input type="checkbox" id="lyCan" checked> Canals</label><label><input type="checkbox" id="lyBase" checked> Background map</label></div>
     <p id="status"></p>
     <p style="margin:6px 0 0;color:#666;font-size:11px">River courses: OpenStreetMap. Fresh/brackish/salt zones are typical averages and shift with river flow. Tidal ranges are rounded spring-tide values.</p>
   </div>
@@ -106,7 +106,7 @@ const R=[
 
 const map=L.map('map').setView([54.3,-2.5],6);
 map.createPane('extra');map.getPane('extra').style.zIndex=350;
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
+const baseLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
 const status=document.getElementById('status');
 const groups={};const all=L.featureGroup().addTo(map);
 
@@ -180,6 +180,7 @@ EXTRA.split('@').forEach(grp=>{const i=grp.indexOf('=');const key=grp.slice(0,i)
 });
 document.getElementById('lyTrib').addEventListener('change',e=>{e.target.checked?map.addLayer(tribLayer):map.removeLayer(tribLayer)});
 document.getElementById('lyCan').addEventListener('change',e=>{e.target.checked?map.addLayer(canalLayer):map.removeLayer(canalLayer)});
+document.getElementById('lyBase').addEventListener('change',e=>{e.target.checked?map.addLayer(baseLayer):map.removeLayer(baseLayer)});
 status.textContent='Main rivers, tributaries and connecting canals from OpenStreetMap. Tap a line for its name.';
 status.style.color='#3B6D11';
 
